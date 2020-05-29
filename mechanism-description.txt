@@ -1,0 +1,14 @@
+Assignment 4 - Mechanism Description
+------------
+
+Sharding
+--
+abc
+
+Causal Dependency Tracking
+--
+xyz
+
+Detecting that a replica is down
+--
+abc
