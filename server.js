@@ -3,8 +3,10 @@ global.globalView = (process.env.VIEW).split(',');
 global.globalVectorClock = {}
 global.globalSocketAddress = process.env.SOCKET_ADDRESS
 global.DB = {}
+global.shard_count = parstInt(process.env.SHARD_COUNT, 10)
 const keyAPI = require('./api/routes/key-value-store')
 const viewAPI = require('./api/routes/key-value-store-view')
+const shardAPI = require('./api/routes/key-value-store-shard')
 const fetch = require('node-fetch');
 
 const express = require('express')
@@ -27,6 +29,11 @@ app.delete('/key-value-store/:key', keyAPI.senderCheck, keyAPI.routeDelete)
 app.get('/key-value-store-view', viewAPI.routeGet)
 app.put('/key-value-store-view', viewAPI.routePut)
 app.delete('/key-value-store-view', viewAPI.routeDelete)
+
+app.get('/key-value-store-shard/shard-ids', shardAPI.routeGetIDs)
+app.get('/key-value-store-shard/node-shard-id', shardAPI.routeGetNodeID)
+app.get('/key-value-store-shard/shard-id-members/:key', shardAPI.routeGetShardMembers)
+app.get('/key-value-store-shard/shard-id-key-count/:key', shardAPI.routeGetNumKeysInShard)
 
 console.log('initial view: ', globalView)
 //console.log("SOCKET_ADDRESS = " + SOCKET_ADDRESS)
@@ -80,4 +87,13 @@ function getDB()
             })
         }
     })
+}
+
+function getShard(view)
+{
+    let shard = []
+    for(let i = 0; i < view.length; i++)
+    {
+        
+    }
 }
