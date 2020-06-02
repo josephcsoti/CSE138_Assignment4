@@ -6,7 +6,6 @@ global.shard_count = parseInt(process.env.SHARD_COUNT, 10)
 global.thisID = 0
 global.globalShards = {}
 setShard()
-console.log("shard count type: ", typeof(shard_count))
 console.log("the shard: ", globalShards)
 const keyAPI = require('./api/routes/key-value-store')
 const viewAPI = require('./api/routes/key-value-store-view')

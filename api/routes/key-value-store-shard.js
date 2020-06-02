@@ -28,7 +28,7 @@ function routeGetNodeID (req, res)
 {
     let message = 
     {
-	"message" : "Shard ID of the new retrived successfully",
+	"message" : "Shard ID of the node retrived successfully",
         "shard-id" : thisID,
     }
 
@@ -41,7 +41,8 @@ function routeGetShardMembers (req, res)
     
     let message = 
     {
-	"message" : "Members of shard ID retrieved successfully",
+    "message" : "Members of shard ID retrieved successfully",
+    "shard-id-members:": globalShards[key]
     }
 
     res.status(STATUS_OK).send(message)
@@ -50,11 +51,16 @@ function routeGetShardMembers (req, res)
 function routeGetNumKeysInShard(req, res)
 {
     let key = req.params['key'] 
+    let len = 0
+    if(DB.length)
+    {
+        len = DB.length
+    }
     
     let message = 
     {
-    "message" : "Members of shard ID retrieved successfully",
-    "shard-id-members": globalShards
+    "message" : "Key count of shard ID retrieved successfully",
+    "shard-id-key-count": len,
     }
 
     res.status(STATUS_OK).send(message)
