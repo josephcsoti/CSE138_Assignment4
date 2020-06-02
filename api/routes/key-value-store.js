@@ -143,7 +143,7 @@ function makeRequestObject(forward_address, source_req) {
 
 // Broadcast request to all nodes listed in globalView
 function broadcast(req, res){
-    globalView.forEach(element => {
+    globalShards[thisID].forEach(element => {
         if(element != process.env.SOCKET_ADDRESS)
         {
             let forward_address = element
