@@ -3,7 +3,7 @@ global.globalVectorClock = {}
 global.globalSocketAddress = process.env.SOCKET_ADDRESS
 global.DB = {}
 global.shard_count = parseInt(process.env.SHARD_COUNT, 10)
-global.thisID = 0
+global.thisID = -1
 global.globalShards = {}
 setShard()
 console.log("the shard: ", globalShards)

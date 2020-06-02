@@ -48,22 +48,45 @@ function routeGetShardMembers (req, res)
     res.status(STATUS_OK).send(message)
 }
 
+function handleForwardResponse(res, f_res, json_f_res){
+    //console.log("Response from server was:", f_res)
+    //console.log("STATUS = "+ f_res.status)
+    res.status(f_res.status).send(json_f_res)
+}
+
+function handleErrorResponse(res, method, error){
+
+    if(error.errno == 'EHOSTUNREACH')
+        res.status(STATUS_DOWN).send({'error': "Main instance is down", 'message': `Error in ${method}`})
+}
+
 function routeGetNumKeysInShard(req, res)
 {
-    let key = req.params['key'] 
-    let len = 0
-    if(DB.length)
+    let key = req.params['key']
+    let len = Object.keys(DB).length
+    
+    if(key != thisID)
     {
-        len = DB.length
+        let url = `http://${globalShards[key][0]}/key-value-store-shard/shard-id-key-count/${key}`
+                // let body = {'socket-address': hostname, 'node': true}
+                fetch(url, {
+                    method: 'GET',
+                    // body: JSON.stringify(body),
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(f_res => f_res.json().then(json_f_res => handleForwardResponse(res, f_res, json_f_res)))
+                .catch(error => handleErrorResponse(res, req.method, error))
+    } else
+    {
+        let message = 
+        {
+        "message" : "Key count of shard ID retrieved successfully",
+        "shard-id-key-count": len,
+        }
+
+        res.status(STATUS_OK).send(message)
     }
     
-    let message = 
-    {
-    "message" : "Key count of shard ID retrieved successfully",
-    "shard-id-key-count": len,
-    }
-
-    res.status(STATUS_OK).send(message)
 }
 
 
