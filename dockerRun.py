@@ -24,7 +24,9 @@ replica4Ip = "10.10.0.5"
 replica4HostPort = "8085"
 replica4SocketAddress = replica4Ip + ":8085"
 
-view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress
+view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress + "," + replica4SocketAddress
+
+shard_count = "2"
 
 ######## FUNCTIONS ##########
 
@@ -40,7 +42,7 @@ def buildDockerImage():
     os.system(command)
 
 def runReplica(hostPort, ipAddress, subnetName, instanceName):
-    command = "docker run -p " + hostPort + ":8085 --net=" + subnetName + " --ip=" + ipAddress + " --name=" + instanceName + " -e SOCKET_ADDRESS=" + ipAddress + ":8085" + " -e VIEW=" + view + " assignment4-img"
+    command = "docker run -p " + hostPort + ":8085 --net=" + subnetName + " --ip=" + ipAddress + " --name=" + instanceName + " -e SOCKET_ADDRESS=" + ipAddress + ":8085" + " -e VIEW=" + view + " -e SHARD_COUNT="+ shard_count +" assignment4-img"
     os.system(command)
     time.sleep(20)
 

@@ -38,7 +38,7 @@ function routeGetShardMembers (req, res)
     
     let message = 
     {
-	"message" : ("this is routeGetShardMembers. your key: " + key),
+	"message" : "Members of shard ID retrieved successfully",
     }
 
     res.status(STATUS_OK).send(message)
@@ -50,7 +50,8 @@ function routeGetNumKeysInShard(req, res)
     
     let message = 
     {
-	"message" : ("this is routeGetNumKeysInShard. your key: " + key),
+    "message" : "Members of shard ID retrieved successfully",
+    "shard-id-members": globalShards
     }
 
     res.status(STATUS_OK).send(message)

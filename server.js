@@ -3,7 +3,11 @@ global.globalVectorClock = {}
 global.globalSocketAddress = process.env.SOCKET_ADDRESS
 global.DB = {}
 global.shard_count = parseInt(process.env.SHARD_COUNT, 10)
-global.globalShards = []
+global.thisID = 0
+global.globalShards = {}
+setShard()
+console.log("shard count type: ", typeof(shard_count))
+console.log("the shard: ", globalShards)
 const keyAPI = require('./api/routes/key-value-store')
 const viewAPI = require('./api/routes/key-value-store-view')
 const shardAPI = require('./api/routes/key-value-store-shard')
@@ -40,9 +44,7 @@ console.log('initial view: ', globalView)
 app.listen(PORT, () => console.log(`Example app listening at http://localhost:${PORT}`))
 broadcastPutView()
 getDB()
-globalView.forEach(address => setShardID(address))
 
-console.log(globalShards)
 
 function broadcastPutView()
 {
@@ -92,17 +94,18 @@ function getDB()
     })
 }
 
-function getShard(view)
+function setShard()
 {
-    let shard = []
-    for(let i = 0; i < view.length; i++)
+    for(let i = 0; i < shard_count; i++)
     {
-        
+        globalShards[i] = []
     }
-}
-
-function setShardID(address) {
-	let shardID =  globalView.indexOf(address) % shard_count
-	globalShards.push({shardID : shardID, addr : address})
-	console.log("New shard added")
+    for(let i = 0; i < globalView.length; i++)
+    {
+        if(globalView[i] == globalSocketAddress)
+        {
+            thisID = i%shard_count
+        }
+        globalShards[i%shard_count].push(globalView[i])
+    }
 }
