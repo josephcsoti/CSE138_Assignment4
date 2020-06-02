@@ -14,9 +14,11 @@ const CAUSALMETA = "causal-metadata"
 
 function routeGetIDs (req, res) 
 {
+    let listShards = Object.keys(globalShards)
     let message = 
     {
-	"message" : "this is routeGetIDs",
+	"message" : "Shard IDs retrieved successfully",
+    	"shard-ids" : listShards,
     }
 
     res.status(STATUS_OK).send(message)
@@ -26,7 +28,8 @@ function routeGetNodeID (req, res)
 {
     let message = 
     {
-	"message" : "this is routeGetNodeID",
+	"message" : "Shard ID of the new retrived successfully",
+        "shard-id" : thisID,
     }
 
     res.status(STATUS_OK).send(message)
