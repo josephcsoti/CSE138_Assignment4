@@ -88,8 +88,8 @@ def test5():
 if __name__ == '__main__':
     # test5()
     # # { '10.10.0.2': 0, '10.10.0.3': 0}
-    vc = putkvOp('8083', 'testkey', 'testing shard 2 value', '')
-    vc = getkvOp('8083', 'testkey', '')
+    # vc = putkvOp('8082', 'testkey', 'test', '')
+    getkvOp('8084', 'testkey', '')
     # vc = putkvOp('8082', 'testkey', 'new val', vc)
     # vc = getkvOp('8084', 'testkey', '')
     # getviewOp(REPLICA1_URL)

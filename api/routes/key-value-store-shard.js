@@ -57,7 +57,7 @@ function handleForwardResponse(res, f_res, json_f_res){
 function handleErrorResponse(res, method, error){
 
     if(error.errno == 'EHOSTUNREACH')
-        res.status(STATUS_DOWN).send({'error': "Main instance is down", 'message': `Error in ${method}`})
+        res.status(STATUS_DOWN).send({'error': "Shard is down", 'message': `Error in ${method}`})
 }
 
 function routeGetNumKeysInShard(req, res)
@@ -68,14 +68,14 @@ function routeGetNumKeysInShard(req, res)
     if(key != thisID)
     {
         let url = `http://${globalShards[key][0]}/key-value-store-shard/shard-id-key-count/${key}`
-                // let body = {'socket-address': hostname, 'node': true}
-                fetch(url, {
-                    method: 'GET',
-                    // body: JSON.stringify(body),
-                    headers: {'Content-Type': 'application/json'}
-                })
-                .then(f_res => f_res.json().then(json_f_res => handleForwardResponse(res, f_res, json_f_res)))
-                .catch(error => handleErrorResponse(res, req.method, error))
+        // let body = {'socket-address': hostname, 'node': true}
+        fetch(url, {
+            method: 'GET',
+            // body: JSON.stringify(body),
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(f_res => f_res.json().then(json_f_res => handleForwardResponse(res, f_res, json_f_res)))
+        .catch(error => handleErrorResponse(res, req.method, error))
     } else
     {
         let message = 

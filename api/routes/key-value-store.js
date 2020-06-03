@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const waitUntil = require('wait-until');
 var FormData = require('form-data');
+var crypto = require('crypto')
 
 const STATUS_OK = 200;
 const STATUS_ERROR = 400;
@@ -274,6 +275,14 @@ function senderCheck(req, res, next){
 function routeGet (req, res, next) {
     let key = req.params['key'] 
     let doesExist = key in DB
+    let targetID = hashToID(key)
+
+    if(targetID !== thisID)
+    {
+        forwardRequest(req, res, targetID)
+        return
+    }
+
     let cm
     // If key doesn't exist send no CM back
     if(doesExist){
@@ -299,6 +308,13 @@ function routeGet (req, res, next) {
 function routePut (req, res) {
     let key = req.params['key'];
     let value = req.body['value'];
+    let targetID = hashToID(key)
+
+    if(targetID !== thisID)
+    {
+        forwardRequest(req, res, targetID)
+        return
+    }
 
     let doesExist = key in DB;
     let errBool = (value == null || key.length > 50);
@@ -339,6 +355,13 @@ function routePut (req, res) {
 function routeDelete (req, res) {
     let key = req.params['key']
     let doesExist = key in DB;
+    let targetID = hashToID(key)
+
+    if(targetID !== thisID)
+    {
+        forwardRequest(req, res, targetID)
+        return
+    }
 
     if(doesExist) {
         delete DB[key]
@@ -381,6 +404,57 @@ function initDB(req, res)
     res.status(STATUS_OK).send(message)
 }
 
+function forwardRequest(req, res, targetID){
+    // Forward exists so 
+    let {url, options} = makeReqObj(req, targetID)
+    //console.log(url, options)
+    fetch(url, options)
+        .then(f_res => f_res.json().then(json_f_res => handleForwardResponse(res, f_res, json_f_res)))
+        .catch(error => handleErrorResponse(res, req.method, error))
+    
+}
+
+function makeReqObj(source_req, targetID) {
+    let protocal = source_req.protocol     // "https"
+    let method = source_req.method         // "GET" 
+    let key = source_req.params['key']
+
+    let url = `${protocal}://${globalShards[targetID][0]}/key-value-store/${key}`
+    let body = JSON.stringify(source_req.body)
+
+    let options = {
+        'method': `${method}`,
+        headers: {'Content-Type': 'application/json'},
+        ...(method !== "GET" && {'body': `${body}`}),
+    }
+ 
+    return {url, options}
+}
+
+function handleForwardResponse(res, f_res, json_f_res){
+    res.status(f_res.status).send(json_f_res)
+}
+
+function handleErrorResponse(res, method, error){
+
+    if(error.errno == 'EHOSTUNREACH')
+        res.status(STATUS_DOWN).send({'error': "Shard is down", 'message': `Error in ${method}`})
+}
+
+function hashToID(key)
+{
+    var h = 5381; // our hash
+    var i = 0; // our iterator
+    for (i = 0; i < key.length; i++) {
+        var ascii = key.charCodeAt(i); // grab ASCII integer
+        h = ((h << 5) + h) + ascii; // bitwise operations
+    }
+    if((h & 0xffffffffff)<=0)
+    {
+      return -(h & 0xffffffffff)%shard_count
+    }
+    return (h & 0xffffffffff)%shard_count
+}
 // TODO: Only export functions still in use
 module.exports = {
     safeCheck: safeCheck,
