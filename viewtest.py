@@ -53,6 +53,12 @@ def deletekvOp(port, key, cm):
     print(response.status_code)
     return responseInJson['causal-metadata']
 
+def putNode(port, key, socketAdd):
+    response = requests.put('http://localhost:'+ port +'/key-value-store-shard/add-member/' + key, json={'socket-address' : socketAdd})
+    responseInJson = response.json()
+    print(responseInJson)
+    print(response.status_code)
+
 
 ## Unit Tests
 
@@ -88,8 +94,7 @@ def test5():
 if __name__ == '__main__':
     # test5()
     # # { '10.10.0.2': 0, '10.10.0.3': 0}
-    # vc = putkvOp('8082', 'testkey', 'test', '')
-    getkvOp('8084', 'testkey', '')
-    # vc = putkvOp('8082', 'testkey', 'new val', vc)
-    # vc = getkvOp('8084', 'testkey', '')
+    # vc = putkvOp('8082', 'tedtkey', 'mmmm yummy', '')
+    # getkvOp('8082', 'tedtkey', vc)
+    putNode('8082', '1', '10.10.0.5:8085')
     # getviewOp(REPLICA1_URL)

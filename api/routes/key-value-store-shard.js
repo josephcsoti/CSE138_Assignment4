@@ -89,6 +89,54 @@ function routeGetNumKeysInShard(req, res)
     
 }
 
+function routePutNewNode(req, res)
+{
+    let key = req.params['key']
+    let new_add = req.body['socket-address']
+    let doesExist = new_add in globalView
+    let addExist = new_add in globalShards[key]
+
+    if(req.body['globalShards'])
+    {
+        if(globalSocketAddress == new_add)
+        {
+            shard_count = req.body['shard_count']
+        }
+        if(!doesExist)
+        {
+            globalView.push(new_add)
+        }
+        console.log("type of received globalShards: ", typeof(req.body['globalShards']))
+        console.log("globalShards: ", req.body['globalShards'])
+        globalShards = req.body['globalShards']
+        res.status(STATUS_OK).json({
+            message: 'broadcast received at ' + globalSocketAddress,
+        });
+    } else {
+        globalShards[key].push(new_add)
+        // globalView.push(new_add)
+        globalView.forEach(element => {
+            if(element != process.env.SOCKET_ADDRESS)
+            {
+                let url = `http://${element}/key-value-store-shard/add-member/${key}`
+                //console.log(url, options)
+                let body = {'socket-address': new_add, 'globalShards': globalShards, 'shard_count': shard_count}
+                fetch(url, {
+                    method: 'PUT',
+                    body: JSON.stringify(body),
+                    headers: {'Content-Type': 'application/json'}
+                })
+                    .then(f_res => f_res.json().then(json_f_res => console.log(json_f_res)))
+                    .catch(error => console.log("in routePutNewNode: ", error))
+            }
+        })
+        let msg = {
+            "message": 'PUT received and broadcasted'
+        }
+        res.status(STATUS_OK).send(msg)
+    }
+}
+
 
 
 module.exports = 
@@ -96,5 +144,6 @@ module.exports =
     routeGetIDs: routeGetIDs,
     routeGetNodeID: routeGetNodeID,
     routeGetShardMembers: routeGetShardMembers,
-    routeGetNumKeysInShard: routeGetNumKeysInShard
+    routeGetNumKeysInShard: routeGetNumKeysInShard,
+    routePutNewNode: routePutNewNode
 }

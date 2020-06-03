@@ -5,7 +5,10 @@ global.DB = {}
 global.shard_count = parseInt(process.env.SHARD_COUNT, 10)
 global.thisID = -1
 global.globalShards = {}
-setShard()
+if(shard_count)
+{
+    setShard()
+}
 console.log("the shard: ", globalShards)
 const keyAPI = require('./api/routes/key-value-store')
 const viewAPI = require('./api/routes/key-value-store-view')
@@ -37,6 +40,7 @@ app.get('/key-value-store-shard/shard-ids', shardAPI.routeGetIDs)
 app.get('/key-value-store-shard/node-shard-id', shardAPI.routeGetNodeID)
 app.get('/key-value-store-shard/shard-id-members/:key', shardAPI.routeGetShardMembers)
 app.get('/key-value-store-shard/shard-id-key-count/:key', shardAPI.routeGetNumKeysInShard)
+app.put('/key-value-store-shard/add-member/:key', shardAPI.routePutNewNode)
 
 console.log('initial view: ', globalView)
 //console.log("SOCKET_ADDRESS = " + SOCKET_ADDRESS)

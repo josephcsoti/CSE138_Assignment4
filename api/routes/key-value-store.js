@@ -279,6 +279,7 @@ function routeGet (req, res, next) {
 
     if(targetID !== thisID)
     {
+        console.log(`forwarding ${req.method} request...`)
         forwardRequest(req, res, targetID)
         return
     }
@@ -312,6 +313,7 @@ function routePut (req, res) {
 
     if(targetID !== thisID)
     {
+        console.log(`forwarding ${req.method} request...`)
         forwardRequest(req, res, targetID)
         return
     }
@@ -359,6 +361,7 @@ function routeDelete (req, res) {
 
     if(targetID !== thisID)
     {
+        console.log(`forwarding ${req.method} request...`)
         forwardRequest(req, res, targetID)
         return
     }
@@ -443,11 +446,11 @@ function handleErrorResponse(res, method, error){
 
 function hashToID(key)
 {
-    var h = 5381; // our hash
-    var i = 0; // our iterator
+    var h = 5381; 
+    var i = 0; 
     for (i = 0; i < key.length; i++) {
-        var ascii = key.charCodeAt(i); // grab ASCII integer
-        h = ((h << 5) + h) + ascii; // bitwise operations
+        var ascii = key.charCodeAt(i);
+        h = ((h << 5) + h) + ascii;
     }
     if((h & 0xffffffffff)<=0)
     {

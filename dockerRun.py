@@ -24,7 +24,9 @@ replica4Ip = "10.10.0.5"
 replica4HostPort = "8085"
 replica4SocketAddress = replica4Ip + ":8085"
 
-view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress + "," + replica4SocketAddress
+view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress
+
+newview = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress + "," + replica4SocketAddress
 
 shard_count = "2"
 
@@ -60,9 +62,12 @@ if __name__ == '__main__':
     # stopAndRemoveInstance("node1")
     # stopAndRemoveInstance("node2")
     # stopAndRemoveInstance("node3")
+    # stopAndRemoveInstance("node4")
     # removeSubnet(subnetName)
     # createSubnet(subnetAddress, subnetName)
     # buildDockerImage()
     # runReplica(replica1HostPort, replica1Ip, subnetName, "node1")
     # runReplica(replica2HostPort, replica2Ip, subnetName, "node2")
-    runReplica(replica3HostPort, replica3Ip, subnetName, "node3")
+    # runReplica(replica3HostPort, replica3Ip, subnetName, "node3")
+    view = newview
+    runReplica(replica4HostPort, replica4Ip, subnetName, "node4")
