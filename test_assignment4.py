@@ -12,7 +12,7 @@ import requests
 import time
 import os
 
-TIMEOUT=60
+TIMEOUT=20
 
 ######################## initialize variables ################################################
 subnetName = "assignment4-net"
@@ -47,12 +47,12 @@ def buildDockerImage():
 def runInstance(hostPort, ipAddress, subnetName, instanceName):
     command = "docker run -d -p " + hostPort + ":8085 --net=" + subnetName + " --ip=" + ipAddress + " --name=" + instanceName + " -e SOCKET_ADDRESS=" + ipAddress + ":8085" + " -e VIEW=" + view + " -e SHARD_COUNT=" + str(shardCount) + " assignment4-img"
     os.system(command)
-    time.sleep(20)
+    time.sleep(5)
 
 def runAdditionalInstance(hostPort, ipAddress, subnetName, instanceName, newView):
     command = "docker run -d -p " + hostPort + ":8085 --net=" + subnetName + " --ip=" + ipAddress + " --name=" + instanceName + " -e SOCKET_ADDRESS=" + ipAddress + ":8085" + " -e VIEW=" + newView  + " assignment4-img"
     os.system(command)
-    time.sleep(20)
+    time.sleep(5)
 
 def stopAndRemoveInstance(instanceName):
     stopCommand = "docker stop " + instanceName
@@ -249,6 +249,9 @@ class TestHW3(unittest.TestCase):
 
             keyShardId = responseInJson["shard-id"]
 
+            print("keyShardId: ", keyShardId)
+            print("shardIDList: ", self.shardIdList)
+
             self.assertTrue(keyShardId in self.shardIdList)
 
             time.sleep(1)
@@ -374,7 +377,7 @@ class TestHW3(unittest.TestCase):
         response = requests.put('http://localhost:8082/key-value-store-shard/reshard', json={'shard-count': 3}, timeout=TIMEOUT)
         self.assertEqual(response.status_code, 200)
 
-        time.sleep(20)
+        time.sleep(10)
 
         # get the new shard IDs from node1
         response = requests.get( 'http://localhost:8082/key-value-store-shard/shard-ids', timeout=TIMEOUT)

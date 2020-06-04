@@ -15,37 +15,46 @@ const CAUSALMETA = "causal-metadata"
 function routeGetIDs (req, res) 
 {
     let listShards = Object.keys(globalShards)
-    let message = 
-    {
-	"message" : "Shard IDs retrieved successfully",
-    	"shard-ids" : listShards,
-    }
+    // let message = 
+    // {
+	//     "message" : "Shard IDs retrieved successfully",
+    // 	"shard-ids" : listShards,
+    // }
 
-    res.status(STATUS_OK).send(message)
+    res.status(STATUS_OK).json({
+        "message" : "Shard IDs retrieved successfully",
+    	"shard-ids" : listShards,
+    })
 }
 
 function routeGetNodeID (req, res) 
 {
-    let message = 
-    {
-	"message" : "Shard ID of the node retrived successfully",
-        "shard-id" : thisID,
-    }
+    // let message = 
+    // {
+	//     "message" : "Shard ID of the node retrived successfully",
+    //     "shard-id" : thisID,
+    // }
 
-    res.status(STATUS_OK).send(message)
+    res.status(STATUS_OK).json({
+        "message" : "Shard ID of the node retrieved successfully",
+        "shard-id" : JSON.stringify(thisID),
+    })
 }
 
 function routeGetShardMembers (req, res) 
 {
     let key = req.params['key'] 
     
-    let message = 
-    {
-    "message" : "Members of shard ID retrieved successfully",
-    "shard-id-members:": globalShards[key]
-    }
+    // let message = 
+    // {
+    // "message" : "Members of shard ID retrieved successfully",
+    // "shard-id-members:": globalShards[key]
+    // }
 
-    res.status(STATUS_OK).send(message)
+    res.status(STATUS_OK).json({
+        "message" : "Members of shard ID retrieved successfully",
+        "shard-id-members": globalShards[key]
+    })
 }
 
 function handleForwardResponse(res, f_res, json_f_res){

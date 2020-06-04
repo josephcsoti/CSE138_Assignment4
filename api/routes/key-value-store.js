@@ -337,7 +337,8 @@ function routePut (req, res) {
         res.status(doesExist? STATUS_OK: STATUS_CREAT).json({
             message: msg,
             replaced: doesExist,
-            "causal-metadata": globalVectorClock
+            "causal-metadata": globalVectorClock,
+            "shard-id": targetID,
         });
         // Determine if node broadcast or original client request
         if (req.body['node']) {
@@ -376,9 +377,10 @@ function routeDelete (req, res) {
 
     let response = {
         "doesExist": doesExist,
-	...(!doesExist && {"error": "Key does not exist"}),
-    "message": message,
-    "causal-metadata": globalVectorClock
+        ...(!doesExist && {"error": "Key does not exist"}),
+        "message": message,
+        "causal-metadata": globalVectorClock,
+        "shard-id": targetID,
     }
 
     res.status(doesExist ? STATUS_OK : STATUS_DNE).send(response)

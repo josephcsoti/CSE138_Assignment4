@@ -94,7 +94,7 @@ def test5():
 if __name__ == '__main__':
     # test5()
     # # { '10.10.0.2': 0, '10.10.0.3': 0}
-    # vc = putkvOp('8082', 'tedtkey', 'mmmm yummy', '')
-    # getkvOp('8082', 'tedtkey', vc)
-    putNode('8082', '1', '10.10.0.5:8085')
+    vc = putkvOp('8082', 'tedtkey', 'mmmm yummy', '')
+    getkvOp('8082', 'tedtkey', vc)
+    # putNode('8082', '1', '10.10.0.5:8085')
     # getviewOp(REPLICA1_URL)
