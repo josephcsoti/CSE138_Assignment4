@@ -23,7 +23,7 @@ function routeGetIDs (req, res)
 
     res.status(STATUS_OK).json({
         "message" : "Shard IDs retrieved successfully",
-    	"shard-ids" : listShards,
+    	"shard-ids" : listShards.map(x=>+x),
     })
 }
 
@@ -37,7 +37,7 @@ function routeGetNodeID (req, res)
 
     res.status(STATUS_OK).json({
         "message" : "Shard ID of the node retrieved successfully",
-        "shard-id" : JSON.stringify(thisID),
+        "shard-id" : thisID,
     })
 }
 

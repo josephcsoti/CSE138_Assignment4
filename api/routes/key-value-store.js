@@ -86,9 +86,12 @@ function initializeVectorClock() {
  // Returns true if VC1 if less than or equal to VC2 and false otherwise
  function compareVectorClocks(VC1, VC2){
     for(let [key, value] of Object.entries(VC2)){
-        if (VC1[key] > VC2[key]){
-            return false            
-        } 
+        if(key in globalShards[thisID])
+        {
+            if (VC1[key] > VC2[key]){
+                return false            
+            } 
+        }
     }
     return true
  }
@@ -98,22 +101,31 @@ function initializeVectorClock() {
     sendersAddress = req.body['address']
     sendersVectorClock = req.body[CAUSALMETA]
     // T[pos] = VC[pos] + 1
-    if(sendersVectorClock[sendersAddress] == globalVectorClock[sendersAddress] + 1){
-        //T[K] <= VC[K] for all K
-        for(let [key, value] of Object.entries(globalVectorClock)){
-            if(key == sendersAddress){
-                continue
-            }
-            else{
-                if(sendersVectorClock[key] > globalVectorClock[key]){
-                    return false
+    if(sendersAddress in globalShards[thisID])
+    {
+        if(sendersVectorClock[sendersAddress] == globalVectorClock[sendersAddress] + 1){
+            //T[K] <= VC[K] for all K
+            for(let [key, value] of Object.entries(globalVectorClock)){
+                if(key in globalShards[thisID])
+                {
+                    if(key == sendersAddress){
+                        continue
+                    }
+                    else{
+                        if(sendersVectorClock[key] > globalVectorClock[key]){
+                            return false
+                        }
+                    }
                 }
             }
+            return true
         }
+        else{
+            return false
+        }
+    } else 
+    {
         return true
-    }
-    else{
-        return false
     }
  }
 
@@ -199,7 +211,7 @@ function senderCheck(req, res, next){
             // node broadcast
             if(isOkay(req)){
                 console.log("IS OKAY")
-                globalVectorClock[req.body['address']]++
+                globalVectorClock[globalSocketAddress]++
                 next()
             }
             else{
@@ -311,13 +323,6 @@ function routePut (req, res) {
     let value = req.body['value'];
     let targetID = hashToID(key)
 
-    if(targetID !== thisID)
-    {
-        console.log(`forwarding ${req.method} request...`)
-        forwardRequest(req, res, targetID)
-        return
-    }
-
     let doesExist = key in DB;
     let errBool = (value == null || key.length > 50);
     if(errBool)
@@ -360,13 +365,6 @@ function routeDelete (req, res) {
     let doesExist = key in DB;
     let targetID = hashToID(key)
 
-    if(targetID !== thisID)
-    {
-        console.log(`forwarding ${req.method} request...`)
-        forwardRequest(req, res, targetID)
-        return
-    }
-
     if(doesExist) {
         delete DB[key]
     }
@@ -380,7 +378,7 @@ function routeDelete (req, res) {
         ...(!doesExist && {"error": "Key does not exist"}),
         "message": message,
         "causal-metadata": globalVectorClock,
-        "shard-id": targetID,
+        "shard-id": JSON.stringify(targetID),
     }
 
     res.status(doesExist ? STATUS_OK : STATUS_DNE).send(response)
@@ -398,6 +396,20 @@ function routeDelete (req, res) {
     }
 }
 
+function checkShard(req, res, next)
+{
+    let key = req.params['key']
+    let targetID = hashToID(key)
+    if(targetID !== thisID)
+    {
+        console.log(`forwarding ${req.method} request...`)
+        forwardRequest(req, res, targetID)
+    } else 
+    {
+        next()
+    }
+}
+
 function initDB(req, res)
 {
     console.log('[initkv] get request from node')
@@ -411,7 +423,7 @@ function initDB(req, res)
 
 function forwardRequest(req, res, targetID){
     // Forward exists so 
-    let {url, options} = makeReqObj(req, targetID)
+    let {url, options} = makeReqObj(globalShards[targetID][0], req)
     //console.log(url, options)
     fetch(url, options)
         .then(f_res => f_res.json().then(json_f_res => handleForwardResponse(res, f_res, json_f_res)))
@@ -419,12 +431,19 @@ function forwardRequest(req, res, targetID){
     
 }
 
-function makeReqObj(source_req, targetID) {
+function makeReqObj(forward_address, source_req) {
     let protocal = source_req.protocol     // "https"
+    let hostname = forward_address     // "google.com"
+    let path = source_req.path             // "/api"
     let method = source_req.method         // "GET" 
     let key = source_req.params['key']
 
-    let url = `${protocal}://${globalShards[targetID][0]}/key-value-store/${key}`
+    if(source_req.body)
+    {
+        source_req.body['node'] = true
+    }
+
+    let url = `${protocal}://${hostname}${path}`
     let body = JSON.stringify(source_req.body)
 
     let options = {
@@ -432,6 +451,9 @@ function makeReqObj(source_req, targetID) {
         headers: {'Content-Type': 'application/json'},
         ...(method !== "GET" && {'body': `${body}`}),
     }
+
+    //console.log('body is: ', body)
+    //console.log('options are:', options)
  
     return {url, options}
 }
@@ -467,5 +489,6 @@ module.exports = {
     routeGet: routeGet,
     routePut: routePut,
     routeDelete: routeDelete,
-    initDB: initDB
+    initDB: initDB,
+    checkShard: checkShard
 };
