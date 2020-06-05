@@ -104,7 +104,6 @@ function routePutNewNode(req, res)
     let key = req.params['key']
     let new_add = req.body['socket-address']
     let doesExist = new_add in globalView
-    let shardExist = new_add in globalShards[key]
 
     if(req.body['globalShards'])
     {
@@ -122,19 +121,11 @@ function routePutNewNode(req, res)
         console.log("globalShards: ", req.body['globalShards'])
         globalShards = req.body['globalShards']
         res.status(STATUS_OK).json({
-            "message": 'broadcast received at ' + globalSocketAddress,
+            message: 'broadcast received at ' + globalSocketAddress,
         });
     } else {
-        if(!shardExist)
-        {
-            globalShards[key].push(new_add)
-        }
-        if(!doesExist)
-        {
-            globalView.push(new_add)
-        }
-        console.log("globalShards: ", globalShards)
-        console.log("globalView: ", globalView)
+        globalShards[key].push(new_add)
+        // globalView.push(new_add)
         globalView.forEach(element => {
             if(element != process.env.SOCKET_ADDRESS)
             {
