@@ -251,7 +251,7 @@ class TestHW3(unittest.TestCase):
 
             self.assertTrue(keyShardId in self.shardIdList)
 
-            time.sleep(.1)
+            time.sleep(.001)
 
     def test_e_get_key_value_operation(self):
 
@@ -268,7 +268,7 @@ class TestHW3(unittest.TestCase):
             print(counter)
             response = requests.get('http://localhost:' + nodeHostPortList[nodeIndex] + '/key-value-store/key' + str(counter), timeout=TIMEOUT)
             responseInJson = response.json()
-            print(responseInJson)
+            # print(responseInJson)
             self.assertEqual(response.status_code, 200)
             value = responseInJson["value"]
             self.assertEqual(value, "value" + str(counter))
@@ -370,6 +370,7 @@ class TestHW3(unittest.TestCase):
         print("\n###################### Doing Impossible Resharding ######################\n")
 
         response = requests.put('http://localhost:8083/key-value-store-shard/reshard', json={'shard-count': 10}, timeout=TIMEOUT)
+        print(response.status_code)
         self.assertEqual(response.status_code, 400)
 
     def test_i_possible_reshard(self):

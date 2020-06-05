@@ -147,7 +147,32 @@ function routePutNewNode(req, res)
     }
 }
 
+function failReshard(res){
+    res.status(STATUS_ERROR).send({"message":"Not enough nodes to provide fault-tolerance with the given shard count!"})
+}
 
+function passReshard(res){
+    res.status(STATUS_OK).send({"message":"Resharding done successfully"})
+}
+
+function getLiveMemberCount(){
+    let live = 0;
+    for(shard in globalShards){
+        live += globalShards[shard].length
+    }
+    return live
+}
+
+function routePutReshard(req, res){
+    let requested_shard_count = req.body['shard-count']
+    let live_count = getLiveMemberCount()
+
+    if(live_count / requested_shard_count >= minNodesNeeded) 
+        passReshard(res)
+    else 
+        failReshard(res)
+    
+}
 
 module.exports = 
 {
@@ -155,5 +180,6 @@ module.exports =
     routeGetNodeID: routeGetNodeID,
     routeGetShardMembers: routeGetShardMembers,
     routeGetNumKeysInShard: routeGetNumKeysInShard,
-    routePutNewNode: routePutNewNode
+    routePutNewNode: routePutNewNode,
+    routePutReshard: routePutReshard
 }
