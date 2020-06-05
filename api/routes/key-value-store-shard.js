@@ -147,28 +147,57 @@ function routePutNewNode(req, res)
     }
 }
 
+
+function getLiveMembers(){
+    let members = [];
+    for(shard in globalShards)
+        for(mem in globalShards[shard])
+            members.push(mem)
+    
+    return members
+}
+
 function failReshard(res){
     res.status(STATUS_ERROR).send({"message":"Not enough nodes to provide fault-tolerance with the given shard count!"})
 }
 
-function passReshard(res){
-    res.status(STATUS_OK).send({"message":"Resharding done successfully"})
+function chunkArray(arr, chunk_size){
+    var results = [];
+    
+    while (arr.length) {
+        results.push(arr.splice(0, chunk_size));
+    }
+    
+    return results;
 }
 
-function getLiveMemberCount(){
-    let live = 0;
-    for(shard in globalShards){
-        live += globalShards[shard].length
+function passReshard(res, requested_shard_count){
+
+    // Update the shard count
+    shard_count = requested_shard_count
+
+    // Get all live nodes
+    let live_nodes = getLiveMembers()
+
+    // Split into chunks
+    // [ [1,2,3], [4,5,6], [7,8] ]
+    let sharded_nodes = chunkArray(live_nodes, requested_shard_count)
+
+    let shard_id = 1;
+    for(shard in sharded_nodes){
+        // shard is [1, 2, 3]
+        // /key-value-store-shard/shard-id-members/:key
     }
-    return live
+
+    res.status(STATUS_OK).send({"message":"Resharding done successfully"})
 }
 
 function routePutReshard(req, res){
     let requested_shard_count = req.body['shard-count']
-    let live_count = getLiveMemberCount()
+    let live_count = getLiveMembers().length
 
     if(live_count / requested_shard_count >= minNodesNeeded) 
-        passReshard(res)
+        passReshard(res, requested_shard_count)
     else 
         failReshard(res)
     
