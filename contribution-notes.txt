@@ -1,6 +1,8 @@
 Samuel Walcoff
 ---
-abc
+Wrote code for getting the members of a shard with a given ID and getting the number of keys stored in a shard.
+Collaboratively designed and wrote the resharding key-val store code. Collaboratively modified Key-Value
+operations and causal consistency to work in a sharded system.
 
 John Nover
 ---
