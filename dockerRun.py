@@ -34,7 +34,7 @@ replica6SocketAddress = replica4Ip + ":8085"
 
 # view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress
 
-view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress + "," + replica4SocketAddress + "," + replica5SocketAddress + "," + replica6SocketAddress
+view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress + "," + replica4SocketAddress #+ "," + replica5SocketAddress + "," + replica6SocketAddress
 
 shard_count = "2"
 
@@ -56,6 +56,11 @@ def runReplica(hostPort, ipAddress, subnetName, instanceName):
     os.system(command)
     time.sleep(20)
 
+def runNewReplica(hostPort, ipAddress, subnetName, instanceName):
+    command = "docker run -p " + hostPort + ":8085 --net=" + subnetName + " --ip=" + ipAddress + " --name=" + instanceName + " -e SOCKET_ADDRESS=" + ipAddress + ":8085" + " -e VIEW=" + view +" assignment4-img"
+    os.system(command)
+    time.sleep(20)
+
 def removeSubnet(subnetName):
     command = "docker network rm " + subnetName
     os.system(command)
@@ -68,13 +73,13 @@ def createSubnet(subnetAddress, subnetName):
 
 if __name__ == '__main__':
     # view = newview
-    stopAndRemoveInstance("node1")
-    stopAndRemoveInstance("node2")
-    stopAndRemoveInstance("node3")
-    stopAndRemoveInstance("node4")
-    stopAndRemoveInstance("node5")
-    stopAndRemoveInstance("node6")
-    removeSubnet(subnetName)
+    # stopAndRemoveInstance("node1")
+    # stopAndRemoveInstance("node2")
+    # stopAndRemoveInstance("node3")
+    # stopAndRemoveInstance("node4")
+    # stopAndRemoveInstance("node5")
+    # stopAndRemoveInstance("node6")
+    # removeSubnet(subnetName)
     # createSubnet(subnetAddress, subnetName)
     # buildDockerImage()
     # runReplica(replica1HostPort, replica1Ip, subnetName, "node1")
@@ -83,3 +88,5 @@ if __name__ == '__main__':
     # runReplica(replica4HostPort, replica4Ip, subnetName, "node4")
     # runReplica(replica5HostPort, replica5Ip, subnetName, "node5")
     # runReplica(replica6HostPort, replica6Ip, subnetName, "node6")
+
+    # runNewReplica(replica5HostPort, replica5Ip, subnetName, "node5")

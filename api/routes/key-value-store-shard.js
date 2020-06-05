@@ -37,7 +37,7 @@ function routeGetNodeID (req, res)
 
     res.status(STATUS_OK).json({
         "message" : "Shard ID of the node retrieved successfully",
-        "shard-id" : thisID,
+        "shard-id" : parseInt(thisID, 10),
     })
 }
 
@@ -103,7 +103,6 @@ function routePutNewNode(req, res)
     let key = req.params['key']
     let new_add = req.body['socket-address']
     let doesExist = new_add in globalView
-    let addExist = new_add in globalShards[key]
 
     if(req.body['globalShards'])
     {
@@ -111,6 +110,7 @@ function routePutNewNode(req, res)
         {
             shard_count = req.body['shard_count']
             thisID = key
+            console.log("INSIDE THE IF. key: ", thisID)
         }
         if(!doesExist)
         {
