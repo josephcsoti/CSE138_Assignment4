@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 const waitUntil = require('wait-until');
 const express = require('express')
 var FormData = require('form-data');
+const kvstore = require('./key-value-store')
 
 const STATUS_OK = 200;
 const STATUS_ERROR = 400;
@@ -103,6 +104,7 @@ function routePutNewNode(req, res)
     let key = req.params['key']
     let new_add = req.body['socket-address']
     let doesExist = new_add in globalView
+    let shardExist = new_add in globalShards[key]
 
     if(req.body['globalShards'])
     {
@@ -120,11 +122,19 @@ function routePutNewNode(req, res)
         console.log("globalShards: ", req.body['globalShards'])
         globalShards = req.body['globalShards']
         res.status(STATUS_OK).json({
-            message: 'broadcast received at ' + globalSocketAddress,
+            "message": 'broadcast received at ' + globalSocketAddress,
         });
     } else {
-        globalShards[key].push(new_add)
-        globalView.push(new_add)
+        if(!shardExist)
+        {
+            globalShards[key].push(new_add)
+        }
+        if(!doesExist)
+        {
+            globalView.push(new_add)
+        }
+        console.log("globalShards: ", globalShards)
+        console.log("globalView: ", globalView)
         globalView.forEach(element => {
             if(element != process.env.SOCKET_ADDRESS)
             {
@@ -147,16 +157,6 @@ function routePutNewNode(req, res)
     }
 }
 
-
-function getLiveMembers(){
-    let members = [];
-    for(shard in globalShards)
-        for(mem in globalShards[shard])
-            members.push(mem)
-    
-    return members
-}
-
 function failReshard(res){
     res.status(STATUS_ERROR).send({"message":"Not enough nodes to provide fault-tolerance with the given shard count!"})
 }
@@ -171,33 +171,101 @@ function chunkArray(arr, chunk_size){
     return results;
 }
 
-function passReshard(res, requested_shard_count){
+function broadcast(req, res){
+    globalView.forEach(element => {
+        if(element != process.env.SOCKET_ADDRESS)
+        {
+            let forward_address = element
+            let {url, options} = makeRequestObject(forward_address, req)
+            //console.log(url, options)
+            fetch(url, options)
+                .then(f_res => f_res.json().then(json_f_res => console.log(json_f_res)))
+                .catch(error => console.log("error from shard PUT(resharding): ", error))
+        }
+    })
+}
+
+function makeRequestObject(forward_address, source_req) {
+    let protocal = source_req.protocol     // "https"
+    let hostname = forward_address         // "google.com"
+    let path = source_req.path             // "/api"
+    let method = source_req.method         // "GET" 
+
+    // Add 'node' field and senders socket address to broadcasts
+    source_req.body['node'] = true
+
+    let url = `${protocal}://${hostname}${path}`
+    let body = JSON.stringify(source_req.body)
+
+    let options = {
+        'method': `${method}`,
+        headers: {'Content-Type': 'application/json'},
+        ...(method !== "GET" && {'body': `${body}`}),
+    }
+    return {url, options}
+}
+
+function setShard()
+{
+    for(let i = 0; i < shard_count; i++)
+    {
+        globalShards[i] = []
+    }
+    for(let i = 0; i < globalView.length; i++)
+    {
+        if(globalView[i] == globalSocketAddress)
+        {
+            thisID = i%shard_count
+        }
+        globalShards[i%shard_count].push(globalView[i])
+    }
+}
+
+function passReshard(req, res, requested_shard_count){
 
     // Update the shard count
     shard_count = requested_shard_count
 
-    // Get all live nodes
-    let live_nodes = getLiveMembers()
+    setShard()
 
-    // Split into chunks
-    // [ [1,2,3], [4,5,6], [7,8] ]
-    let sharded_nodes = chunkArray(live_nodes, requested_shard_count)
-
-    let shard_id = 1;
-    for(shard in sharded_nodes){
-        // shard is [1, 2, 3]
-        // /key-value-store-shard/shard-id-members/:key
+    if(!req.body['node']) //if it's from another node
+    {
+        broadcast(req, res)
     }
+
+    for(key in DB)
+    {
+        let target_id = kvstore.hashToID(key)
+        if(target_id !== thisID)
+        {
+            let method = 'PUT'
+            let body = JSON.stringify({'value': DB[key]})
+            let url = `http://${globalShards[target_id][0]}/key-value-store/${key}`
+            let options = {
+                'method': `${method}`,
+                headers: {'Content-Type': 'application/json'},
+                ...(method !== "GET" && {'body': `${body}`}),
+            }
+            // fetch(url, options)
+            // .then(f_res => f_res.json().then(json_f_res => console.log(json_f_res)))
+            // .catch(error => handleErrorResponse(res, "PUT", error))
+
+            delete DB[key]
+        }
+    }
+
+
+
 
     res.status(STATUS_OK).send({"message":"Resharding done successfully"})
 }
 
 function routePutReshard(req, res){
-    let requested_shard_count = req.body['shard-count']
-    let live_count = getLiveMembers().length
+    let requested_shard_count = parseInt(req.body['shard-count'], 10)
+    let live_count = globalView.length
 
     if(live_count / requested_shard_count >= minNodesNeeded) 
-        passReshard(res, requested_shard_count)
+        passReshard(req, res, requested_shard_count)
     else 
         failReshard(res)
     

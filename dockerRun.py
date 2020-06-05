@@ -36,6 +36,8 @@ replica6SocketAddress = replica4Ip + ":8085"
 
 view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress + "," + replica4SocketAddress #+ "," + replica5SocketAddress + "," + replica6SocketAddress
 
+newview = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress + "," + replica4SocketAddress + "," + replica5SocketAddress
+
 shard_count = "2"
 
 ######## FUNCTIONS ##########
@@ -44,7 +46,7 @@ def stopAndRemoveInstance(instanceName):
     stopCommand = "docker stop " + instanceName
     removeCommand = "docker rm " + instanceName
     os.system(stopCommand)
-    time.sleep(2)
+    time.sleep(0.5)
     os.system(removeCommand)
 
 def buildDockerImage():
@@ -57,7 +59,7 @@ def runReplica(hostPort, ipAddress, subnetName, instanceName):
     time.sleep(20)
 
 def runNewReplica(hostPort, ipAddress, subnetName, instanceName):
-    command = "docker run -p " + hostPort + ":8085 --net=" + subnetName + " --ip=" + ipAddress + " --name=" + instanceName + " -e SOCKET_ADDRESS=" + ipAddress + ":8085" + " -e VIEW=" + view +" assignment4-img"
+    command = "docker run -p " + hostPort + ":8085 --net=" + subnetName + " --ip=" + ipAddress + " --name=" + instanceName + " -e SOCKET_ADDRESS=" + ipAddress + ":8085" + " -e VIEW=" + newview +" assignment4-img"
     os.system(command)
     time.sleep(20)
 

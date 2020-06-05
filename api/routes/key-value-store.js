@@ -485,5 +485,6 @@ module.exports = {
     routePut: routePut,
     routeDelete: routeDelete,
     initDB: initDB,
-    checkShard: checkShard
+    checkShard: checkShard,
+    hashToID: hashToID
 };
