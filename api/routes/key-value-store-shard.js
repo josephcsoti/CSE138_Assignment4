@@ -146,23 +146,16 @@ function routePutNewNode(req, res)
         }
         res.status(STATUS_OK).send(msg)
     }
+
+    globalView = globalView.filter((a, b) => globalView.indexOf(a) === b)
 }
 
 function failReshard(res){
     res.status(STATUS_ERROR).send({"message":"Not enough nodes to provide fault-tolerance with the given shard count!"})
 }
 
-function chunkArray(arr, chunk_size){
-    var results = [];
-    
-    while (arr.length) {
-        results.push(arr.splice(0, chunk_size));
-    }
-    
-    return results;
-}
-
 function broadcast(req, res){
+    globalView = globalView.filter((a, b) => globalView.indexOf(a) === b)
     globalView.forEach(element => {
         if(element != process.env.SOCKET_ADDRESS)
         {

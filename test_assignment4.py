@@ -12,7 +12,7 @@ import requests
 import time
 import os
 
-TIMEOUT=60
+TIMEOUT=30
 
 ######################## initialize variables ################################################
 subnetName = "assignment4-net"
@@ -90,7 +90,7 @@ class TestHW3(unittest.TestCase):
 
     shardIdList = []
     shardsMemberList = []
-    keyCount = 600
+    keyCount = 100
 
     ######################## Build docker image and create subnet ################################
     print("###################### Building Docker Image ######################\n")
@@ -378,7 +378,7 @@ class TestHW3(unittest.TestCase):
         response = requests.put('http://localhost:8082/key-value-store-shard/reshard', json={'shard-count': 3}, timeout=TIMEOUT)
         self.assertEqual(response.status_code, 200)
 
-        time.sleep(20)
+        time.sleep(5)
 
         # get the new shard IDs from node1
         response = requests.get( 'http://localhost:8082/key-value-store-shard/shard-ids', timeout=TIMEOUT)
