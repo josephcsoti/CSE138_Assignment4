@@ -28,7 +28,7 @@ app.use(express.json())
 
 app.get('/initkv', keyAPI.initDB)
 
-app.get('/key-value-store/:key', keyAPI.checkShard, keyAPI.routeGet)
+app.get('/key-value-store/:key', keyAPI.routeGet)
 app.put('/key-value-store/:key', keyAPI.checkShard, keyAPI.senderCheck, keyAPI.routePut)
 app.delete('/key-value-store/:key', keyAPI.checkShard, keyAPI.senderCheck, keyAPI.routeDelete)
 

@@ -110,6 +110,7 @@ function routePutNewNode(req, res)
         if(globalSocketAddress == new_add)
         {
             shard_count = req.body['shard_count']
+            thisID = key
         }
         if(!doesExist)
         {
@@ -123,7 +124,7 @@ function routePutNewNode(req, res)
         });
     } else {
         globalShards[key].push(new_add)
-        // globalView.push(new_add)
+        globalView.push(new_add)
         globalView.forEach(element => {
             if(element != process.env.SOCKET_ADDRESS)
             {
@@ -140,7 +141,7 @@ function routePutNewNode(req, res)
             }
         })
         let msg = {
-            "message": 'PUT received and broadcasted'
+            "message": 'PUT new node received and broadcasted'
         }
         res.status(STATUS_OK).send(msg)
     }

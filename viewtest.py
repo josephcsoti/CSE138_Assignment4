@@ -94,27 +94,35 @@ def test5():
 if __name__ == '__main__':
     # test5()
     # # { '10.10.0.2': 0, '10.10.0.3': 0}
-    vc = putkvOp('8082', 'key0', 'value0', '')
+    # vc = putkvOp('8082', 'key0', 'value0', '')
 
-    vc = putkvOp('8083', 'key1', 'value1', vc)
+    # vc = putkvOp('8083', 'key1', 'value1', vc)
 
-    vc = putkvOp('8084', 'key2', 'value2', vc)
+    # vc = putkvOp('8084', 'key2', 'value2', vc)
 
-    vc = putkvOp('8085', 'key3', 'value3', vc)
+    # vc = putkvOp('8085', 'key3', 'value3', vc)
 
-    vc = putkvOp('8082', 'key4', 'value4', vc)
+    # vc = putkvOp('8082', 'key4', 'value4', vc)
 
-    vc = putkvOp('8083', 'key5', 'value5', vc)
+    # vc = putkvOp('8083', 'key5', 'value5', vc)
 
-    vc = putkvOp('8084', 'key6', 'value6', vc)
+    # vc = putkvOp('8084', 'key6', 'value6', vc)
 
-    vc = putkvOp('8085', 'key7', 'value7', vc)
+    # vc = putkvOp('8085', 'key7', 'value7', vc)
 
-    vc = putkvOp('8082', 'key8', 'value8', vc)
+    # vc = putkvOp('8082', 'key8', 'value8', vc)
 
-    vc = putkvOp('8083', 'key9', 'value9', vc)
+    # vc = putkvOp('8083', 'key9', 'value9', vc)
 
-    vc = putkvOp('8084', 'key10', 'value10', vc)
-    # getkvOp('8082', 'tedtkey', vc)
+    # vc = putkvOp('8084', 'key10', 'value10', vc)
+    vc = ''
+    for i in range(500):
+        j = (i%6) + 2
+        vc = putkvOp('808'+str(j), 'key'+str(i), 'value'+str(i), vc)
+
+    for i in range(500):
+        j = (i%6) + 2
+        getkvOp('808'+str(j), 'key'+str(i), '')
+
     # putNode('8082', '1', '10.10.0.5:8085')
     # getviewOp(REPLICA1_URL)

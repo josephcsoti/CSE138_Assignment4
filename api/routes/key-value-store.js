@@ -289,7 +289,7 @@ function routeGet (req, res, next) {
     let doesExist = key in DB
     let targetID = hashToID(key)
 
-    if(targetID !== thisID)
+    if(targetID !== thisID || !doesExist)
     {
         console.log(`forwarding ${req.method} request...`)
         forwardRequest(req, res, targetID)
@@ -378,7 +378,7 @@ function routeDelete (req, res) {
         ...(!doesExist && {"error": "Key does not exist"}),
         "message": message,
         "causal-metadata": globalVectorClock,
-        "shard-id": JSON.stringify(targetID),
+        "shard-id": targetID,
     }
 
     res.status(doesExist ? STATUS_OK : STATUS_DNE).send(response)
@@ -437,11 +437,6 @@ function makeReqObj(forward_address, source_req) {
     let path = source_req.path             // "/api"
     let method = source_req.method         // "GET" 
     let key = source_req.params['key']
-
-    if(source_req.body)
-    {
-        source_req.body['node'] = true
-    }
 
     let url = `${protocal}://${hostname}${path}`
     let body = JSON.stringify(source_req.body)

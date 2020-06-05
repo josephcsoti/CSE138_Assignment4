@@ -24,9 +24,17 @@ replica4Ip = "10.10.0.5"
 replica4HostPort = "8085"
 replica4SocketAddress = replica4Ip + ":8085"
 
+replica5Ip = "10.10.0.6"
+replica5HostPort = "8086"
+replica5SocketAddress = replica4Ip + ":8085"
+
+replica6Ip = "10.10.0.7"
+replica6HostPort = "8087"
+replica6SocketAddress = replica4Ip + ":8085"
+
 # view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress
 
-view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress + "," + replica4SocketAddress
+view = replica1SocketAddress + "," + replica2SocketAddress + "," + replica3SocketAddress + "," + replica4SocketAddress + "," + replica5SocketAddress + "," + replica6SocketAddress
 
 shard_count = "2"
 
@@ -64,6 +72,8 @@ if __name__ == '__main__':
     stopAndRemoveInstance("node2")
     stopAndRemoveInstance("node3")
     stopAndRemoveInstance("node4")
+    stopAndRemoveInstance("node5")
+    stopAndRemoveInstance("node6")
     removeSubnet(subnetName)
     # createSubnet(subnetAddress, subnetName)
     # buildDockerImage()
@@ -71,3 +81,5 @@ if __name__ == '__main__':
     # runReplica(replica2HostPort, replica2Ip, subnetName, "node2")
     # runReplica(replica3HostPort, replica3Ip, subnetName, "node3")
     # runReplica(replica4HostPort, replica4Ip, subnetName, "node4")
+    # runReplica(replica5HostPort, replica5Ip, subnetName, "node5")
+    # runReplica(replica6HostPort, replica6Ip, subnetName, "node6")

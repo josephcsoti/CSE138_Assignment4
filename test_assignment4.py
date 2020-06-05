@@ -251,7 +251,7 @@ class TestHW3(unittest.TestCase):
 
             self.assertTrue(keyShardId in self.shardIdList)
 
-            time.sleep(1)
+            time.sleep(.1)
 
     def test_e_get_key_value_operation(self):
 
@@ -265,8 +265,10 @@ class TestHW3(unittest.TestCase):
             nodeIndex = (counter + 1 ) % len(nodeIpList)
 
             # get the value of the key
+            print(counter)
             response = requests.get('http://localhost:' + nodeHostPortList[nodeIndex] + '/key-value-store/key' + str(counter), timeout=TIMEOUT)
             responseInJson = response.json()
+            print(responseInJson)
             self.assertEqual(response.status_code, 200)
             value = responseInJson["value"]
             self.assertEqual(value, "value" + str(counter))
@@ -289,6 +291,9 @@ class TestHW3(unittest.TestCase):
         responseInJson = response.json()
         self.assertEqual(response.status_code, 200)
         shard2KeyCount = int(responseInJson['shard-id-key-count'])
+
+        print("shard1 key count: ", shard1KeyCount)
+        print("shard2 key count: ", shard2KeyCount)
 
         # sum of key counts in shards == total keys
         self.assertEqual(self.keyCount, shard1KeyCount + shard2KeyCount)
