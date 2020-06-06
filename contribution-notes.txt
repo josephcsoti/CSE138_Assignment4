@@ -10,7 +10,7 @@ xyz
 
 Joseph Csoti
 ---
-abc
+I worked on debuging, impossible sharding and helped solve some duplicate node errors when resharding
 
 Kevin Arellano
 ---
