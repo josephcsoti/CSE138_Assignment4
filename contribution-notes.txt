@@ -6,7 +6,7 @@ operations and causal consistency to work in a sharded system.
 
 John Nover
 ---
-xyz
+Worked on testing and debugging of resharding, sharding, and adding new nodes. Helped design the mechanisms for them as well.
 
 Joseph Csoti
 ---
