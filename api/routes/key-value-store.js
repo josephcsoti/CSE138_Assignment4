@@ -280,7 +280,7 @@ function senderCheck(req, res, next){
     else{
         //TODO: What if causal-metadata is not a field???
         console.log("TODO: WHAT IF CM NOT IN BODY??")
-        process.exit(1)
+        next()
     }
 }
 

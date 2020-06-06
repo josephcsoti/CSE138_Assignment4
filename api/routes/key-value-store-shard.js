@@ -222,24 +222,20 @@ function passReshard(req, res, requested_shard_count){
         let target_id = kvstore.hashToID(key)
         if(target_id !== thisID)
         {
-            let method = 'PUT'
-            let body = JSON.stringify({'value': DB[key]})
             let url = `http://${globalShards[target_id][0]}/key-value-store/${key}`
             let options = {
-                'method': `${method}`,
-                headers: {'Content-Type': 'application/json'},
-                ...(method !== "GET" && {'body': `${body}`}),
+                'method':"PUT",
+                'headers': {'Content-Type': 'application/json'},
+                'body': JSON.stringify({'value': DB[key]}),
+                'reshard': true
             }
-            // fetch(url, options)
-            // .then(f_res => f_res.json().then(json_f_res => console.log(json_f_res)))
-            // .catch(error => handleErrorResponse(res, "PUT", error))
+            fetch(url, options)
+                .then(f_res => f_res.json().then(json_f_res => console.log(json_f_res)))
+                .catch(error => console.log(error))
 
             delete DB[key]
         }
     }
-
-
-
 
     res.status(STATUS_OK).send({"message":"Resharding done successfully"})
 }

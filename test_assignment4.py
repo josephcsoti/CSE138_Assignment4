@@ -12,7 +12,7 @@ import requests
 import time
 import os
 
-TIMEOUT=30
+TIMEOUT=60
 
 ######################## initialize variables ################################################
 subnetName = "assignment4-net"
@@ -33,12 +33,12 @@ shardCount = 2
 def removeSubnet(subnetName):
     command = "docker network rm " + subnetName
     os.system(command)
-    time.sleep(0.5)
+    time.sleep(2)
 
 def createSubnet(subnetAddress, subnetName):
     command  = "docker network create --subnet=" + subnetAddress + " " + subnetName
     os.system(command)
-    time.sleep(0.5)
+    time.sleep(2)
 
 def buildDockerImage():
     command = "docker build -t assignment4-img ."
@@ -47,18 +47,18 @@ def buildDockerImage():
 def runInstance(hostPort, ipAddress, subnetName, instanceName):
     command = "docker run -d -p " + hostPort + ":8085 --net=" + subnetName + " --ip=" + ipAddress + " --name=" + instanceName + " -e SOCKET_ADDRESS=" + ipAddress + ":8085" + " -e VIEW=" + view + " -e SHARD_COUNT=" + str(shardCount) + " assignment4-img"
     os.system(command)
-    time.sleep(1)
+    time.sleep(20)
 
 def runAdditionalInstance(hostPort, ipAddress, subnetName, instanceName, newView):
     command = "docker run -d -p " + hostPort + ":8085 --net=" + subnetName + " --ip=" + ipAddress + " --name=" + instanceName + " -e SOCKET_ADDRESS=" + ipAddress + ":8085" + " -e VIEW=" + newView  + " assignment4-img"
     os.system(command)
-    time.sleep(1)
+    time.sleep(20)
 
 def stopAndRemoveInstance(instanceName):
     stopCommand = "docker stop " + instanceName
     removeCommand = "docker rm " + instanceName
     os.system(stopCommand)
-    time.sleep(0.5)
+    time.sleep(2)
     os.system(removeCommand)
 
 def connectToNetwork(subnetName, instanceName):
@@ -90,7 +90,7 @@ class TestHW3(unittest.TestCase):
 
     shardIdList = []
     shardsMemberList = []
-    keyCount = 100
+    keyCount = 600
 
     ######################## Build docker image and create subnet ################################
     print("###################### Building Docker Image ######################\n")
@@ -129,7 +129,7 @@ class TestHW3(unittest.TestCase):
     ########################## Run tests #######################################################
 
     def test_a_get_shard_ids(self):
-        time.sleep(4)
+        time.sleep(10)
 
         print("\n###################### Getting Shard IDs ######################\n")
 
@@ -240,6 +240,7 @@ class TestHW3(unittest.TestCase):
 
         for counter in range(self.keyCount):
             nodeIndex = counter % len(nodeIpList)
+
             # put a new key in the store
             response = requests.put('http://localhost:' + nodeHostPortList[nodeIndex] + '/key-value-store/key' + str(counter), json={'value': "value" + str(counter), "causal-metadata": nextCausalMetadata}, timeout=TIMEOUT)
             responseInJson = response.json()
@@ -250,11 +251,11 @@ class TestHW3(unittest.TestCase):
 
             self.assertTrue(keyShardId in self.shardIdList)
 
-            time.sleep(.001)
+            time.sleep(1)
 
     def test_e_get_key_value_operation(self):
 
-        time.sleep(3)
+        time.sleep(10)
 
         print("\n###################### Getting keys/values from the store ######################\n")
 
@@ -266,7 +267,6 @@ class TestHW3(unittest.TestCase):
             # get the value of the key
             response = requests.get('http://localhost:' + nodeHostPortList[nodeIndex] + '/key-value-store/key' + str(counter), timeout=TIMEOUT)
             responseInJson = response.json()
-            # print(responseInJson)
             self.assertEqual(response.status_code, 200)
             value = responseInJson["value"]
             self.assertEqual(value, "value" + str(counter))
@@ -289,9 +289,6 @@ class TestHW3(unittest.TestCase):
         responseInJson = response.json()
         self.assertEqual(response.status_code, 200)
         shard2KeyCount = int(responseInJson['shard-id-key-count'])
-
-        print("shard1 key count: ", shard1KeyCount)
-        print("shard2 key count: ", shard2KeyCount)
 
         # sum of key counts in shards == total keys
         self.assertEqual(self.keyCount, shard1KeyCount + shard2KeyCount)
@@ -321,7 +318,7 @@ class TestHW3(unittest.TestCase):
 
         runAdditionalInstance(node7HostPort, node7Ip, subnetName, "node7", newView)
 
-        time.sleep(4)
+        time.sleep(10)
 
         # get the new view from node1
         response = requests.get( 'http://localhost:8082/key-value-store-view', timeout=TIMEOUT)
@@ -368,7 +365,6 @@ class TestHW3(unittest.TestCase):
         print("\n###################### Doing Impossible Resharding ######################\n")
 
         response = requests.put('http://localhost:8083/key-value-store-shard/reshard', json={'shard-count': 10}, timeout=TIMEOUT)
-        print(response.status_code)
         self.assertEqual(response.status_code, 400)
 
     def test_i_possible_reshard(self):
@@ -378,7 +374,7 @@ class TestHW3(unittest.TestCase):
         response = requests.put('http://localhost:8082/key-value-store-shard/reshard', json={'shard-count': 3}, timeout=TIMEOUT)
         self.assertEqual(response.status_code, 200)
 
-        time.sleep(5)
+        time.sleep(20)
 
         # get the new shard IDs from node1
         response = requests.get( 'http://localhost:8082/key-value-store-shard/shard-ids', timeout=TIMEOUT)
@@ -414,10 +410,6 @@ class TestHW3(unittest.TestCase):
         shard3Members = responseInJson['shard-id-members']
         self.assertGreater(len(shard3Members), 1)
 
-        print(shard1Members)
-        print(shard2Members)
-        print(shard3Members)
-        
         self.assertEqual(len(shard1Members + shard2Members + shard3Members), len(nodeSocketAddressList) + 1)
 
         # get the shard id of node4
